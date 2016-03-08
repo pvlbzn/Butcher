@@ -1,9 +1,14 @@
 # The Butcher Project
 
-Butcher is an internal tool of the liox for cutting Android drawables
-automatically for all resolutions.
+Butcher is a tool of the 'liox' for cutting drawables
+automatically.
 
+Second puprose is to try Python and Go on the same kind of problem.
+:wq
+
+```
 TODO:
     Implement Butcher in
         - Python
         - Golang
+```
