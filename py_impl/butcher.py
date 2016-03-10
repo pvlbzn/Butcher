@@ -1,16 +1,22 @@
 import os
 import sys
-import time
 
 from PIL import Image
 from pathlib import Path
 
-DPI = ['ldpi', 'mdpi', 'hdpi', 'xhdpi', 'xxhdpi', 'xxxhdpi']
-SCALES = {"ldpi": .75, "mdpi": 1.0, "hdpi": 1.5,
+DPI = ["ldpi", "mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]
+SCL = {"ldpi": .75, "mdpi": 1.0, "hdpi": 1.5,
         "xhdpi": 2.0, "xxhdpi": 3.0, "xxxhdpi": 4.0}
 
-def files():
-    afiles = os.listdir("input")
+def files(folder):
+    """Fetches files.
+    Fetches files from input folder and filter them by file prefix.
+    Args:
+        folder (str): Name of the folder with images.
+    Returns:
+        List of the image files.
+    """
+    afiles = os.listdir(folder)
     sfiles = []
     for f in afiles:
         if f[len(f)-4:] == ".png":
@@ -18,54 +24,76 @@ def files():
     return sfiles
 
 def read_args():
-    # Take a first argument, which has to be
+    """Return first arg, which should be DPI name."""
     return sys.argv[1]
 
 def get_sizes(img, dpi, dpi_range):
+    """Create sizes in which the user image(s) should be converted.
+    Args:
+        img (Image): Already opened image which should be processed.
+        dpi (string): Original size DPI. Was provided by the user.
+        dpi_range (list): List of DPIs from user DPI to lowest DPI.
+    Returns:
+        Dictionary where DPI (string) is a key and tuple of width, height
+        (float). Example: {'DPI': (W, H), ... }
+    """
     size = img.size
-    # Downscale size to mdpi
-    print(size[0], size[1])
-    mdpi_w = size[0] / SCALES[dpi]
-    mdpi_h = size[1] / SCALES[dpi]
+    # Downscale size to mdpi for convinience.
+    mdpi_w = size[0] / SCL[dpi]
+    mdpi_h = size[1] / SCL[dpi]
     sizes = {}
-    for scale in SCALES:
+    for scale in SCL:
         if scale in dpi_range:
-            w = mdpi_w * SCALES[scale]
-            h = mdpi_h * SCALES[scale]
+            w = mdpi_w * SCL[scale]
+            h = mdpi_h * SCL[scale]
             sizes[scale] = (w, h)
     return sizes
 
 def downscale(img, sizes, name):
+    """Downscale image.
+    Iterates over 'sizes' dictionary entries, where key is a DPI and a value
+    is a tuple with width, height. While iterating over entries, its shrinks
+    images to the size of the entry tuple and saves an output to the folder
+    with name 'drawable-[DPI]'.
+    Args:
+        img (Image): Already opened image which slould be processed.
+        sizes (dict): Dictionary {'DPI': (H, W), ... }
+        name (string): Original filename.
+    """
     for key in sizes:
         folder = '/' + "drawable-" + key + '/'
         fname = os.path.abspath("output") + folder + name
-        print("Saving file {0} in {1}".format(name, fname))
-        print(key, sizes[key])
+        print("Saving file {0}({1}) as w:{2} h:{3}.".format(name, img.size,
+            sizes[key][0], sizes[key][1]))
         # Copy img. Otherwise one image will be croped len(sizes) times.
         i = img.copy()
         i.thumbnail(sizes[key], Image.ANTIALIAS)
         i.save(fname, "PNG")
         i.close()
 
-def check_dirs(sizes):
+def check_dirs(output_dir, sizes):
+    """Check is needed directories exists.
+    If not - create it.
+    Args:
+        output_dir (string): Name of the output folder.
+        sizes (dict): Dictionary of the sizes.
+    """
     for key in sizes:
-        # TODO: Use different path generation.
-        dir = Path("output/drawable-" + key)
+        dir = Path(output_dir + key)
         if not dir.exists():
             dir.mkdir()
 
 def main():
-    flist = files()
+    flist = files("input")
+    output_dir = "output/drawable-"
     user_dpi = read_args()
-    # Filter out DPI that higher than user's DPI.
+    # Filter out DPI that 'bigger' than user's DPI.
     dpi_range = DPI[:DPI.index(user_dpi) + 1]
     for fname in flist:
         addr = "input/" + fname
         with Image.open(addr) as img:
             sizes = get_sizes(img, user_dpi, dpi_range)
-            check_dirs(sizes)
-            print("Should be once!")
-            # Check directories for DPIs which will be used.
+            check_dirs(output_dir, sizes)
             downscale(img, sizes, fname)
 
 if __name__ == '__main__':
