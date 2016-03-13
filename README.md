@@ -1,9 +1,7 @@
 # Butcher
 ###Image re-sizer which aware of output quality.
 
-Work in progress.
-
-Currently it aimed to handle image resizing for Android.
+Work in progress. Currently it aimed to handle image resizing for Android. Interface implemented as a web app (Flask).
 
 For example,
 
