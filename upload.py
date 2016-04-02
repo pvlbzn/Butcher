@@ -9,6 +9,7 @@ ALLOWED = set(['png', 'jpg'])
 
 a = Flask(__name__)
 a.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+a.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024
 
 @a.route('/')
 def index():
@@ -26,6 +27,10 @@ def upload():
 
 def file_allowed(fname):
     return '.' in fname and fname.rsplit('.', 1)[1] in ALLOWED
+
+def rescale():
+    pass
+    return redirect(url_for('uploaded_file', filename=fname))
 
 @a.route('/uploads/<filename>')
 def uploaded_file(filename):
