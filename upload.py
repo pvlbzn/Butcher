@@ -1,9 +1,10 @@
 import os
 
-from flask import Flask, render_template, request, \
-    redirect, url_for, send_from_directory
+from flask import Flask, render_template, request, redirect, \
+        url_for, send_from_directory
 from werkzeug import secure_filename
 
+# TODO: Move to the settings.
 UPLOAD_FOLDER = 'uploads/'
 ALLOWED = set(['png', 'jpg'])
 
@@ -17,13 +18,14 @@ def index():
 
 @a.route('/upload', methods=['POST'])
 def upload():
-    # Get the name of the uploaded file
-    file = request.files['file']
-    # Check it
-    if file and file_allowed(file.filename):
-        fname = secure_filename(file.filename)
-        file.save(os.path.join(a.config['UPLOAD_FOLDER'], fname))
-        return redirect(url_for('uploaded_file', filename=fname))
+    uploaded = request.files.getlist("file[]")
+    filenames = []
+    for f in uploaded:
+        if f and file_allowed(f.filename):
+            filename = secure_filename(f.filename)
+            f.save(os.path.join(a.config['UPLOAD_FOLDER'], filename))
+            filenames.append(filename)
+    return render_template('upload.html', filenames=filenames)
 
 def file_allowed(fname):
     return '.' in fname and fname.rsplit('.', 1)[1] in ALLOWED
