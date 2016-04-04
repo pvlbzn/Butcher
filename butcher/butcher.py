@@ -2,7 +2,6 @@ import os
 import sys
 
 from PIL import Image
-from pathlib import Path
 
 DPI = ["ldpi", "mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]
 SCL = {"ldpi": .75, "mdpi": 1.0, "hdpi": 1.5,
@@ -19,6 +18,7 @@ def files(folder):
     afiles = os.listdir(folder)
     sfiles = []
     for f in afiles:
+        # Can be used feature from stdlib, but this way is ok for cuurent impl.
         if f[len(f)-4:] == ".png":
             sfiles.append(f)
     return sfiles
@@ -49,7 +49,7 @@ def get_sizes(img, dpi, dpi_range):
             sizes[scale] = (w, h)
     return sizes
 
-def downscale(img, sizes, name):
+def downscale(img, sizes, name, dir):
     """Downscale image.
     Iterates over 'sizes' dictionary entries, where key is a DPI and a value
     is a tuple with width, height. While iterating over entries, its shrinks
@@ -62,7 +62,7 @@ def downscale(img, sizes, name):
     """
     for key in sizes:
         folder = '/' + "drawable-" + key + '/'
-        fname = os.path.abspath("output") + folder + name
+        fname = os.path.abspath(dir) + folder + name
         print("Saving file {0}({1}) as w:{2} h:{3}.".format(name, img.size,
             sizes[key][0], sizes[key][1]))
         # Copy img. Otherwise one image will be croped len(sizes) times.
@@ -79,13 +79,13 @@ def check_dirs(output_dir, sizes):
         sizes (dict): Dictionary of the sizes.
     """
     for key in sizes:
-        dir = Path(output_dir + key)
-        if not dir.exists():
-            dir.mkdir()
+        dir = output_dir + key
+        if not os.path.isdir(dir):
+            os.mkdir(dir)
 
 def main():
     flist = files("input")
-    output_dir = "output/drawable-"
+    output_dir = os.path.join(os.getcwd(), 'output', "drawable-")
     user_dpi = read_args()
     # Filter out DPI that 'bigger' than user's DPI.
     dpi_range = DPI[:DPI.index(user_dpi) + 1]
@@ -94,7 +94,7 @@ def main():
         with Image.open(addr) as img:
             sizes = get_sizes(img, user_dpi, dpi_range)
             check_dirs(output_dir, sizes)
-            downscale(img, sizes, fname)
+            downscale(img, sizes, fname, "output")
 
 if __name__ == '__main__':
     main()
