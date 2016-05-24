@@ -29,10 +29,7 @@ var SCL = map[string]float32{"ldpi": .75, "mdpi": 1.0, "hdpi": 1.5,
 
 // Take an image and scale it to different scales.
 func Butch(path, name, userDPI string) {
-	img := new(Img)
-	img.Name = name
-	img.NDPI = userDPI
-	img.Path = path
+	img := &Img{Name: name, NDPI: userDPI, Path: path}
 
 	// Name of the current operation.
 	folderN := "output"
