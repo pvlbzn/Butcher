@@ -19,6 +19,7 @@ def create_test_env(n, w, h):
         n -= 1
     return path
 
+
 def cleanup(path):
     ''' Clean project from test env. Should be executed by the last test. '''
     import shutil
@@ -27,14 +28,17 @@ def cleanup(path):
         # os.system("rm -rf " + path)
         shutil.rmtree(path)
 
+
 def test_files():
     path = create_test_env(2, 250, 250)
     assert butcher.files(path) == ["img1.png", "img2.png"]
+
 
 def test_get_sizes():
     path = os.path.join(os.getcwd(), 'testenv')
     m = Image.open(os.path.join(path, 'img1.png'))
     assert butcher.get_sizes(m, 'mdpi', ['mdpi']) == {'mdpi': (250.0, 250.0)}
+
 
 def test_downscale():
     path = os.path.join(os.getcwd(), 'testenv')
@@ -42,4 +46,3 @@ def test_downscale():
     butcher.check_dirs(os.path.join(path, 'drawable-'), ['mdpi'])
     butcher.downscale(m, {'mdpi': (250.0, 250.0)}, 'img1.png', 'testenv')
     cleanup(path)
-

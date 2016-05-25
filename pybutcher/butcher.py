@@ -4,8 +4,13 @@ import sys
 from PIL import Image
 
 DPI = ["ldpi", "mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]
-SCL = {"ldpi": .75, "mdpi": 1.0, "hdpi": 1.5,
-        "xhdpi": 2.0, "xxhdpi": 3.0, "xxxhdpi": 4.0}
+SCL = {"ldpi": .75,
+       "mdpi": 1.0,
+       "hdpi": 1.5,
+       "xhdpi": 2.0,
+       "xxhdpi": 3.0,
+       "xxxhdpi": 4.0}
+
 
 def files(folder):
     """Fetches files.
@@ -19,13 +24,15 @@ def files(folder):
     sfiles = []
     for f in afiles:
         # Can be used feature from stdlib, but this way is ok for cuurent impl.
-        if f[len(f)-4:] == ".png":
+        if f[len(f) - 4:] == ".png":
             sfiles.append(f)
     return sfiles
+
 
 def read_args():
     """Return first arg, which should be DPI name."""
     return sys.argv[1]
+
 
 def get_sizes(img, dpi, dpi_range):
     """Create sizes in which the user image(s) should be converted.
@@ -49,6 +56,7 @@ def get_sizes(img, dpi, dpi_range):
             sizes[scale] = (w, h)
     return sizes
 
+
 def downscale(img, sizes, name, dir):
     """Downscale image.
     Iterates over 'sizes' dictionary entries, where key is a DPI and a value
@@ -63,13 +71,14 @@ def downscale(img, sizes, name, dir):
     for key in sizes:
         folder = '/' + "drawable-" + key + '/'
         fname = os.path.abspath(dir) + folder + name
-        print("Saving file {0}({1}) as w:{2} h:{3}.".format(name, img.size,
-            sizes[key][0], sizes[key][1]))
+        print("Saving file {0}({1}) as w:{2} h:{3}.".format(
+            name, img.size, sizes[key][0], sizes[key][1]))
         # Copy img. Otherwise one image will be croped len(sizes) times.
         i = img.copy()
         i.thumbnail(sizes[key], Image.ANTIALIAS)
         i.save(fname, "PNG")
         i.close()
+
 
 def check_dirs(output_dir, sizes):
     """Check is needed directories exists.
@@ -83,6 +92,7 @@ def check_dirs(output_dir, sizes):
         if not os.path.isdir(dir):
             os.mkdir(dir)
 
+
 def main():
     flist = files("input")
     output_dir = os.path.join(os.getcwd(), 'output', "drawable-")
@@ -95,6 +105,7 @@ def main():
             sizes = get_sizes(img, user_dpi, dpi_range)
             check_dirs(output_dir, sizes)
             downscale(img, sizes, fname, "output")
+
 
 if __name__ == '__main__':
     main()
